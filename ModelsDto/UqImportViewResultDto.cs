@@ -1,4 +1,4 @@
-namespace WebApi.ModelsDto
+namespace WepApi.ModelsDto
 {
     public class UqImportViewResultDto
     {

@@ -1,8 +1,9 @@
-using WebApi.Data;
+using WepApi.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WepApi.Areas.Identity.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using WepApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("IdentityDbContext") ?? throw new InvalidOperationException("Connection string 'IdentityDbContext' not found.");
@@ -72,6 +73,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 

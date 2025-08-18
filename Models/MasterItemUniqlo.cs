@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace WebApi.Models
+namespace WepApi.Models
 {
     [Table("master_item_uniqlo")]
     public class MasterItemUniqlo

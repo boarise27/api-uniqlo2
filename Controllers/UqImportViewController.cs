@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WebApi.Data;
-using WebApi.Models;
-using WebApi.ModelsDto;
+using WepApi.Data;
+using WepApi.Models;
+using WepApi.ModelsDto;
 
-namespace WebApi.Controllers
+namespace WepApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

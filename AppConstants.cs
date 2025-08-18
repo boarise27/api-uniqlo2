@@ -1,4 +1,4 @@
-namespace WebApi
+namespace WepApi
 {
     public static class AppConstants
     {

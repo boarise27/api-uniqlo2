@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace WebApi.ModelsDto
+namespace WepApi.ModelsDto
 {
     public class MasterItemUniqloDto
     {

@@ -1,7 +1,7 @@
-namespace WebApi.Data;
+namespace WepApi.Data;
 
 using Microsoft.EntityFrameworkCore;
-using WebApi.Models;
+using WepApi.Models;
 
 public class MySQLDbContext : DbContext
 {

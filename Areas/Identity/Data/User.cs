@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 
 namespace WepApi.Areas.Identity.Data;
@@ -14,5 +10,11 @@ public class User : IdentityUser
 
     public bool IsActive { get; set; } = true;
     public bool IsAdmin { get; set; } = false;
-}
+
+
+    public string GetFullName()
+    {
+        return $"{FirstName} {LastName}".Trim();
+    }
+}   
 
