@@ -28,7 +28,7 @@ obj/
 # NuGet Packages
 *.nupkg
 # Entity Framework
-migrations/
+# migrations/
 # Others
 *.DS_Store
 Thumbs.db
