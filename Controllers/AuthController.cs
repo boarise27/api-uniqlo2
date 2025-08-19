@@ -50,8 +50,7 @@ namespace WepApi.Controllers
         }
 
 
-        [HttpPost]
-        public async Task<IActionResult> CreateToken(String username)
+        private async Task<IActionResult> CreateToken(String username)
         {
             var user = await _userManager.FindByNameAsync(username);
             if (user == null)
@@ -81,7 +80,7 @@ namespace WepApi.Controllers
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return Ok(new { Token = token, message = "Token created successfully." });
+            return Ok(new { Token = tokenHandler.WriteToken(token), message = "Token created successfully." });
         }
 
         [HttpPost]
@@ -138,7 +137,6 @@ namespace WepApi.Controllers
             return Ok(new
             {
                 message = "User profile retrieved successfully.",
-                user = userProfile,
                 fullName = _fullName
             });
         }

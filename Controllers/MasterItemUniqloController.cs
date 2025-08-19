@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using WepApi.Data;
 using WepApi.Models;
 using WepApi.ModelsDto;
+using WepApi.Services;
 
 namespace WepApi.Controllers
 {
@@ -14,9 +15,12 @@ namespace WepApi.Controllers
     {
         private readonly MySQLDbContext _context;
 
-        public MasterItemUniqloController(MySQLDbContext context)
+        private readonly IUserService _userService;
+
+        public MasterItemUniqloController(MySQLDbContext context, IUserService userService)
         {
             _context = context;
+            _userService = userService;
         }
 
         // Define your API endpoints here
@@ -113,6 +117,8 @@ namespace WepApi.Controllers
                     FabricCode = string.IsNullOrEmpty(itemDto.FabricCode) ? null : itemDto.FabricCode,
                     FabricColor = string.IsNullOrEmpty(itemDto.FabricColor) ? null : itemDto.FabricColor,
                     FabricDesc = string.IsNullOrEmpty(itemDto.FabricDesc) ? null : itemDto.FabricDesc,
+                    CreatedBy = await _userService.GetCurrentUserAsync(User),
+                    CreatedAt = DateTime.UtcNow,
                     IsActive = true // Assuming new items are active by default
                 };
 
@@ -159,6 +165,8 @@ namespace WepApi.Controllers
                 item.FabricCode = string.IsNullOrEmpty(itemDto.FabricCode) ? null : itemDto.FabricCode;
                 item.FabricColor = string.IsNullOrEmpty(itemDto.FabricColor) ? null : itemDto.FabricColor;
                 item.FabricDesc = string.IsNullOrEmpty(itemDto.FabricDesc) ? null : itemDto.FabricDesc;
+                item.UpdatedBy = await _userService.GetCurrentUserAsync(User);
+                item.UpdatedAt = DateTime.UtcNow;
                 item.IsActive = itemDto.IsActive;
 
                 _context.MasterItemUniqlos.Update(item);

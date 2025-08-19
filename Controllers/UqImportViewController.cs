@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using WepApi.Data;
 using WepApi.Models;
 using WepApi.ModelsDto;
+using WepApi.Services;
 
 namespace WepApi.Controllers
 {
@@ -11,10 +12,12 @@ namespace WepApi.Controllers
     public class UqImportViewController : ControllerBase
     {
         private readonly MySQLDbContext _context;
+        private readonly IUserService _userService;
 
-        public UqImportViewController(MySQLDbContext context)
+        public UqImportViewController(MySQLDbContext context, IUserService userService)
         {
             _context = context;
+            _userService = userService;
         }
 
         // Define your API endpoints here
@@ -70,6 +73,7 @@ namespace WepApi.Controllers
                 QtySys = x.QtySys,
                 QtyConfirm = x.QtyConfirm,
                 Status = x.Status,
+
                 CreatedAt = x.CreatedAt != null ? x.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm:ss") : null,
                 UpdatedAt = x.UpdatedAt != null ? x.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm:ss") : null
             }).ToListAsync();
@@ -116,7 +120,7 @@ namespace WepApi.Controllers
             int diff = today.DayOfWeek == DayOfWeek.Sunday ? -6 : DayOfWeek.Monday - today.DayOfWeek;
             var monday = today.AddDays(diff);
 
-            var newItems = Enumerable.Range(0, itemDto.Amount).Select(_ => new UqImportView
+            var newItems = Enumerable.Range(0, itemDto.Amount).Select(async _ => new UqImportView
             {
                 OutputType = itemDto.Type,
                 OutputItem = "TEMP",
@@ -126,12 +130,14 @@ namespace WepApi.Controllers
                 OutputColor = itemDto.Type == AppConstants.GREIGE_TYPE_VALUE ? "Greige" : null,
                 InputItem = itemDto.Type == AppConstants.GREIGE_TYPE_VALUE ? "Greige" : null,
                 InputColor = itemDto.Type == AppConstants.GREIGE_TYPE_VALUE ? "Greige" : null,
+                CreatedBy = await _userService.GetCurrentUserAsync(User),
+                CreatedAt = DateTime.UtcNow
             }).ToList();
 
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                _context.UqImportViews.AddRange(newItems);
+                _context.UqImportViews.AddRange((IEnumerable<UqImportView>)newItems);
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
             }
@@ -204,6 +210,7 @@ namespace WepApi.Controllers
                     property.SetValue(item, itemDto.NewValue);
                 }
                 property.SetValue(item, itemDto.NewValue);
+                item.UpdatedBy = await _userService.GetCurrentUserAsync(User);
                 item.UpdatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -251,8 +258,7 @@ namespace WepApi.Controllers
             item.WeekSys = itemDto.WeekSys.Date;
             item.QtySys = itemDto.QtySys;
             item.QtyConfirm = itemDto.QtyConfirm;
-            item.Status = itemDto.Status;
-
+            item.UpdatedBy = await _userService.GetCurrentUserAsync(User);
             item.UpdatedAt = DateTime.UtcNow;
 
             using var transaction = await _context.Database.BeginTransactionAsync();
@@ -282,7 +288,8 @@ namespace WepApi.Controllers
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                var items = await _context.UqImportViews.Where(x => x.OutputItem == "TEMP").ToListAsync();
+                var user = await _userService.GetCurrentUserAsync(User);
+                var items = await _context.UqImportViews.Where(x => x.OutputItem == "TEMP" && x.CreatedBy == user).ToListAsync();
                 if (items == null || items.Count == 0)
                 {
                     return NotFound(new
