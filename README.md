@@ -19,12 +19,12 @@ cd api-uniqlo4
 
 ### 2. Restore Dependencies
 ```sh
-dotnet restore
+dotnet restore WepApi.csproj
 ```
 
 ### 3. Build Project
 ```sh
-dotnet build
+dotnet build WepApi.csproj
 ```
 
 ### 4. Database Setup
@@ -32,6 +32,8 @@ dotnet build
 - สร้าง/อัปเดตฐานข้อมูล
 ```sh
 dotnet ef database update
+dotnet ef database update --context MySQLDbContext
+dotnet ef database update --context WepApiIdentityDbContext
 ```
 
 ### 5. Run Project

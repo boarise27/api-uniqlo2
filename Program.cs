@@ -12,15 +12,20 @@ var connectionString = builder.Configuration.GetConnectionString("IdentityDbCont
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins",
-        builder => builder.AllowAnyOrigin()
-                          .AllowAnyMethod()
-                          .AllowAnyHeader());
+    options.AddPolicy("AllowManyOrigins",
+        builder => builder.WithOrigins(
+            "http://localhost:9000"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials());
 });
 
 builder.Services.AddDbContext<MySQLDbContext>();
+var serverVersion = new MySqlServerVersion(new Version(8, 0, 40));
 builder.Services.AddDbContext<WepApiIdentityDbContext>(
-    options => options.UseMySql(connectionString!, new MySqlServerVersion(new Version(8, 0, 21)))
+    options => options.UseMySql(connectionString!, serverVersion,
+        mySqlOptions => mySqlOptions.EnableRetryOnFailure())
 );
 
 builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = false).AddEntityFrameworkStores<WepApiIdentityDbContext>();
@@ -79,22 +84,23 @@ builder.Services.AddScoped<IUserService, UserService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Production"))
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+app.MapGet("/", context =>
+{
+    context.Response.Redirect("/swagger");
+    return Task.CompletedTask;
+});
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseAuthentication();
-app.UseCors(options =>
-{
-    options.AllowAnyOrigin();
-    options.AllowAnyMethod();
-    options.AllowAnyHeader();
-});
+app.UseCors("AllowManyOrigins");
 app.UseAuthorization();
 
 app.MapControllers();

@@ -1,0 +1,13 @@
+bin/
+obj/
+.vs/
+*.md
+*.user
+*.suo
+*.log
+.git/
+.gitignore
+Dockerfile
+docker-compose.yml
+.env
+DataProtection-Keys

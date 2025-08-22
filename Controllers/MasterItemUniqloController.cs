@@ -27,7 +27,39 @@ namespace WepApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllItems()
         {
-            var items = await _context.MasterItemUniqlos.ToListAsync();
+            var items = await _context.MasterItemUniqlos.Select(
+                x => new MasterItemUniqloResultDto
+                {
+                    Type = x.Type,
+                    UniqloCode = x.UniqloCode,
+                    UniqloColor = x.UniqloColor,
+                    UniqloDesc = x.UniqloDesc,
+                    GreigeCode = x.GreigeCode,
+                    FabricCode = x.FabricCode,
+                    FabricColor = x.FabricColor,
+                    FabricDesc = x.FabricDesc,
+                    IsActive = x.IsActive
+                }
+            ).ToListAsync();
+
+            return Ok(new
+            {
+                message = "Items retrieved successfully",
+                data = items
+            });
+        }
+
+        [HttpGet("list")]
+        public async Task<IActionResult> GetListItems()
+        {
+            var items = await _context.MasterItemUniqlos
+                .Select(x => new
+                {
+                    label = x.UniqloCode,
+                    value = x.UniqloCode,
+                })
+                .ToListAsync();
+
             return Ok(new
             {
                 message = "Items retrieved successfully",
@@ -38,7 +70,21 @@ namespace WepApi.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetItemById(int id)
         {
-            var item = await _context.MasterItemUniqlos.FindAsync(id);
+            var item = await _context.MasterItemUniqlos
+                .Where(x => x.Id == id)
+                .Select(x => new MasterItemUniqloResultDto
+                {
+                    Type = x.Type,
+                    UniqloCode = x.UniqloCode,
+                    UniqloColor = x.UniqloColor,
+                    UniqloDesc = x.UniqloDesc,
+                    GreigeCode = x.GreigeCode,
+                    FabricCode = x.FabricCode,
+                    FabricColor = x.FabricColor,
+                    FabricDesc = x.FabricDesc,
+                    IsActive = x.IsActive
+                })
+                .FirstOrDefaultAsync();
             if (item == null)
             {
                 return NotFound(new

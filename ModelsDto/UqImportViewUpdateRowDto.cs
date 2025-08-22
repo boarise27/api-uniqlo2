@@ -2,33 +2,27 @@ using System.Text.Json.Serialization;
 
 namespace WepApi.ModelsDto
 {
-    public class UqImportViewResultDto
+    public class UqImportViewUpdateRowDto
     {
-        [JsonPropertyName("uq_row_id")]
-        public int Id { get; set; }
         [JsonPropertyName("output_type")]
         public string? OutputType { get; set; }
         [JsonPropertyName("output_item")]
         public string? OutputItem { get; set; }
         [JsonPropertyName("output_color")]
         public string? OutputColor { get; set; }
-        [JsonPropertyName("record_type")]
-        public string? RecordType { get; set; }
         [JsonPropertyName("input_item")]
         public string? InputItem { get; set; }
         [JsonPropertyName("input_color")]
         public string? InputColor { get; set; }
+        [JsonPropertyName("record_type")]
+        public string? RecordType { get; set; }
         [JsonPropertyName("week_sys")]
         public string? WeekSys { get; set; }
         [JsonPropertyName("qty_sys")]
-        public int? QtySys { get; set; }
+        public string? QtySys { get; set; }
         [JsonPropertyName("qty_confirm")]
-        public int? QtyConfirm { get; set; }
+        public string? QtyConfirm { get; set; }
         [JsonPropertyName("status")]
         public string? Status { get; set; }
-        [JsonPropertyName("created_at")]
-        public string? CreatedAt { get; set; }
-        [JsonPropertyName("updated_at")]
-        public string? UpdatedAt { get; set; }
     }
 }

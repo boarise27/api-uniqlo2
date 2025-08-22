@@ -24,7 +24,7 @@ public class MySQLDbContext : DbContext
         {
             var connectionString = _connectionString.GetConnectionString("DefaultMySQLConnection");
             var serverVersion = new MySqlServerVersion(new Version(8, 0, 40));
-            optionsBuilder.UseMySql(connectionString, serverVersion)
+            optionsBuilder.UseMySql(connectionString, serverVersion, mySqlOptions => mySqlOptions.EnableRetryOnFailure())
                             .LogTo(Console.WriteLine, LogLevel.Information)
                           .EnableSensitiveDataLogging()
                           .EnableDetailedErrors();

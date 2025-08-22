@@ -13,7 +13,10 @@ namespace WepApi.Controllers
             var types = AppConstants.TypesList
                 .Select(t => new { t.Value, t.Label })
                 .ToList();
-            return Ok(types);
+            return Ok(new
+            {
+                data = types
+            });
         }
 
         [HttpGet("record-types")]
@@ -22,7 +25,10 @@ namespace WepApi.Controllers
             var recordTypes = AppConstants.RecordTypes
                 .Select(t => new { t.Value, t.Label })
                 .ToList();
-            return Ok(recordTypes);
+            return Ok(new
+            {
+                data = recordTypes
+            });
         }
 
         [HttpGet("status")]
@@ -31,7 +37,10 @@ namespace WepApi.Controllers
             var statusList = AppConstants.StatusList
                 .Select(t => new { t.Value, t.Label })
                 .ToList();
-            return Ok(statusList);
+            return Ok(new
+            {
+                data = statusList
+            });
         }
     }
 }

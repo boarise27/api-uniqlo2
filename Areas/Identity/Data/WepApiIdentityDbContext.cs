@@ -14,6 +14,8 @@ public class WepApiIdentityDbContext : IdentityDbContext<User>
     {
     }
 
+    public override DbSet<User> Users { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

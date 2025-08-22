@@ -72,7 +72,7 @@ namespace WepApi.Controllers
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddMinutes(configuration["Jwt:ExpiryMinutes"] != null ? Convert.ToInt32(configuration["Jwt:ExpiryMinutes"]) : 30),
+                Expires = DateTime.Now.AddDays(configuration["Jwt:ExpireDays"] != null ? Convert.ToInt32(configuration["Jwt:ExpireDays"]) : 3),
                 SigningCredentials = credentials,
                 Issuer = configuration["Jwt:Issuer"],
                 Audience = configuration["Jwt:Audience"]
@@ -132,12 +132,13 @@ namespace WepApi.Controllers
                 return NotFound(new { Message = "User not found." });
             }
 
-            var _fullName = await _userService.GetCurrentUserAsync(User);
-
             return Ok(new
             {
                 message = "User profile retrieved successfully.",
-                fullName = _fullName
+                data = new
+                {
+                    full_name = $"{userProfile.FirstName} {userProfile.LastName}",
+                }
             });
         }
     }

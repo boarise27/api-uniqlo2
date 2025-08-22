@@ -10,7 +10,7 @@ namespace WepApi.ModelsDto
         public int Amount { get; set; }
         // Add other properties as needed
         [Required]
-        [JsonPropertyName("type")]
+        [JsonPropertyName("opt")]
         public required string Type { get; set; }
 
         public UqImportViewAddRowDto()

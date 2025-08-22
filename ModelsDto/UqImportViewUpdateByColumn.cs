@@ -5,13 +5,13 @@ namespace WepApi.ModelsDto
 {
     public class UqImportViewUpdateByColumn
     {
+        // [Required]
+        // [JsonPropertyName("id")]
+        // public int Id { get; set; }
         [Required]
-        [JsonPropertyName("id")]
-        public int Id { get; set; }
-        [Required]
-        [JsonPropertyName("column_name")]
+        [JsonPropertyName("input_type")]
         public string? ColumnName { get; set; }
-        [JsonPropertyName("new_value")]
+        [JsonPropertyName("initial_value")]
         public string? NewValue { get; set; }
     }
 }
