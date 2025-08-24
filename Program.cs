@@ -14,7 +14,8 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowManyOrigins",
         builder => builder.WithOrigins(
-            "http://localhost:9000"
+            "http://localhost:9000",
+            "https://nanyanggroup.nanyangtextile.com"
         )
         .AllowAnyHeader()
         .AllowAnyMethod()
@@ -82,22 +83,48 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/uniqlo/swagger/index.html"))
+    {
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation($"Request: {context.Request.Path}");
+    }
+    await next();
+});
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Production"))
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Production") || app.Environment.IsEnvironment("Test"))
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    var swaggerPath = app.Environment.IsDevelopment() ? "swagger" : "uniqlo/swagger";
+
+    app.UseSwagger(
+        c =>
+        {
+            c.RouteTemplate = $"{swaggerPath}/{{documentName}}/swagger.json";
+        }
+    );
+    app.UseSwaggerUI(
+        c =>
+        {
+            c.RoutePrefix = swaggerPath;
+            c.SwaggerEndpoint($"/{swaggerPath}/v1/swagger.json", "API V1");
+        }
+    );
 }
+
 
 app.MapGet("/", context =>
 {
-    context.Response.Redirect("/swagger");
+    var swaggerPath = app.Environment.IsDevelopment() ? "/swagger" : "/uniqlo/swagger";
+    context.Response.Redirect(swaggerPath);
+    // context.Response.Redirect("/swagger");
     return Task.CompletedTask;
 });
 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
+
 
 app.UseAuthentication();
 app.UseCors("AllowManyOrigins");

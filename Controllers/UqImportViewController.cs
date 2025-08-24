@@ -133,16 +133,28 @@ namespace WepApi.Controllers
                 CreatedAt = DateTime.UtcNow
             }).ToList();
 
-            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            var strategy = _context.Database.CreateExecutionStrategy();
             try
             {
-                _context.UqImportViews.AddRange((IEnumerable<UqImportView>)newItems);
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using var transaction = await _context.Database.BeginTransactionAsync();
+                    try
+                    {
+                        _context.UqImportViews.AddRange(newItems);
+                        await _context.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        throw; // ให้ strategy retry ได้
+                    }
+                });
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
                 return StatusCode(500, new
                 {
                     message = "An error occurred while creating the items",
@@ -193,36 +205,44 @@ namespace WepApi.Controllers
                 });
             }
 
-            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            var strategy = _context.Database.CreateExecutionStrategy();
             try
             {
-                if (itemDto.ColumnName!.Equals("week_sys", StringComparison.OrdinalIgnoreCase))
+                await strategy.ExecuteAsync(async () =>
                 {
-                    if (DateTime.TryParse(itemDto.NewValue?.ToString(), out var parsedDate))
+                    using var transaction = await _context.Database.BeginTransactionAsync();
+                    try
                     {
-                        property.SetValue(item, parsedDate.Date);
-                    }
-                    else
-                    {
-                        return BadRequest(new
+                        if (itemDto.ColumnName!.Equals("week_sys", StringComparison.OrdinalIgnoreCase))
                         {
-                            message = "Invalid date format for WeekSys. Expected format: yyyy-MM-dd"
-                        });
+                            if (DateTime.TryParse(itemDto.NewValue?.ToString(), out var parsedDate))
+                            {
+                                property.SetValue(item, parsedDate.Date);
+                            }
+                            else
+                            {
+                                throw new Exception("Invalid date format for WeekSys. Expected format: yyyy-MM-dd");
+                            }
+                        }
+                        else
+                        {
+                            property.SetValue(item, itemDto.NewValue);
+                        }
+                        item.UpdatedBy = await _userService.GetCurrentUserAsync(User);
+                        item.UpdatedAt = DateTime.UtcNow;
+                        await _context.SaveChangesAsync();
+                        await transaction.CommitAsync();
                     }
-                }
-                else
-                {
-                    property.SetValue(item, itemDto.NewValue);
-                }
-                property.SetValue(item, itemDto.NewValue);
-                item.UpdatedBy = await _userService.GetCurrentUserAsync(User);
-                item.UpdatedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
+                    catch (Exception)
+                    {
+                        await transaction.RollbackAsync();
+                        throw;
+                    }
+                });
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
                 return BadRequest(new
                 {
                     message = $"Failed to update column '{itemDto.ColumnName}': {ex.Message}"
@@ -279,15 +299,27 @@ namespace WepApi.Controllers
             item.UpdatedBy = await _userService.GetCurrentUserAsync(User);
             item.UpdatedAt = DateTime.UtcNow;
 
-            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            var strategy = _context.Database.CreateExecutionStrategy();
             try
             {
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using var transaction = await _context.Database.BeginTransactionAsync();
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception)
+                    {
+                        await transaction.RollbackAsync();
+                        throw;
+                    }
+                });
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
                 return BadRequest(new
                 {
                     message = $"Failed to update item: {ex.Message}"
@@ -324,26 +356,35 @@ namespace WepApi.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteItem()
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            var strategy = _context.Database.CreateExecutionStrategy();
             try
             {
-                var user = await _userService.GetCurrentUserAsync(User);
-                var items = await _context.UqImportViews.Where(x => x.OutputItem == "TEMP" && x.CreatedBy == user).ToListAsync();
-                if (items == null || items.Count == 0)
+                await strategy.ExecuteAsync(async () =>
                 {
-                    return NotFound(new
+                    using var transaction = await _context.Database.BeginTransactionAsync();
+                    try
                     {
-                        message = "Item not found"
-                    });
-                }
+                        var user = await _userService.GetCurrentUserAsync(User);
+                        var items = await _context.UqImportViews.Where(x => x.OutputItem == "TEMP" && x.CreatedBy == user).ToListAsync();
+                        if (items == null || items.Count == 0)
+                        {
+                            throw new Exception("Item not found");
+                        }
 
-                _context.UqImportViews.RemoveRange(items);
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
+                        _context.UqImportViews.RemoveRange(items);
+                        await _context.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception)
+                    {
+                        await transaction.RollbackAsync();
+                        throw;
+                    }
+                });
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
                 return BadRequest(new
                 {
                     message = $"Failed to delete item: {ex.Message}"

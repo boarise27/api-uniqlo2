@@ -38,7 +38,8 @@ namespace WepApi.Controllers
                     FabricCode = x.FabricCode,
                     FabricColor = x.FabricColor,
                     FabricDesc = x.FabricDesc,
-                    IsActive = x.IsActive
+                    IsActive = x.IsActive,
+                    UniqloId = x.Id
                 }
             ).ToListAsync();
 

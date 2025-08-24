@@ -1,0 +1,13 @@
+services:
+  webapi:
+    build: .
+    container_name: uniqlo-webapi-test
+    ports:
+      - "8005:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Test
+    restart: unless-stopped
+    volumes:
+      - dataprotect-keys-test:/root/.aspnet/DataProtection-Keys
+volumes:
+  dataprotect-keys-test:

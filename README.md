@@ -70,3 +70,9 @@ dotnet ef database update
 ## Contact
 - ผู้พัฒนา: <your name>
 - Email: <your email>
+
+dotnet clean api-uniqlo4.sln
+dotnet build api-uniqlo4.sln
+
+dotnet clean WepApi.csproj
+dotnet build WepApi.csproj

@@ -43,3 +43,4 @@ node_modules/
 DataProtection-Keys/
 appsettings.Development.json
 appsettings.Production.json
+appsettings.Test.json

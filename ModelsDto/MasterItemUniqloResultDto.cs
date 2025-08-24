@@ -26,5 +26,8 @@ namespace WepApi.ModelsDto
         [JsonPropertyName("is_active")]
         public bool IsActive { get; set; }
 
+        [JsonPropertyName("uniqlo_id")]
+        public int UniqloId { get; set; }
+
     }
 }
